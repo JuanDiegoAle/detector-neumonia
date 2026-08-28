@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NeumoAI - Detector de Neumonía</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, #dbeafe 0%, transparent 35%),
+                radial-gradient(circle at bottom right, #e0f2fe 0%, transparent 35%),
+                #f8fafc;
+
+            color: #0f172a;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            width: 100%;
+            height: 72px;
+
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+
+            border-bottom: 1px solid #e2e8f0;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 7%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 12px;
+
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            color: white;
+            font-size: 21px;
+
+            box-shadow: 0 6px 18px rgba(37,99,235,0.25);
+        }
+
+        .logo-text h2 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .logo-text span {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            color: #15803d;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+
+            background: #22c55e;
+
+            border-radius: 50%;
+
+            box-shadow: 0 0 0 4px #dcfce7;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        main {
+            width: 90%;
+            max-width: 1100px;
+
+            margin: 45px auto 60px;
+        }
+
+        .hero {
+            text-align: center;
+
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-flex;
+
+            padding: 7px 14px;
+
+            border-radius: 30px;
+
+            background: #eff6ff;
+            color: #2563eb;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            margin-bottom: 14px;
+
+            border: 1px solid #dbeafe;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+            margin-bottom: 10px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, #2563eb, #0891b2);
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: #64748b;
+
+            max-width: 600px;
+
+            margin: auto;
+
+            line-height: 1.6;
+
+            font-size: 15px;
+        }
+
+
+        /* =========================
+           GRID
+        ========================= */
+
+        .dashboard {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.92);
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 20px;
+
+            padding: 26px;
+
+            box-shadow:
+                0 10px 30px rgba(15,23,42,0.06);
+
+            transition: 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 15px 35px rgba(15,23,42,0.09);
+        }
+
+        .card-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .card-title-icon {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 10px;
+
+            background: #eff6ff;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #2563eb;
+
+            font-size: 17px;
+        }
+
+        .card-title h3 {
+            font-size: 16px;
+        }
+
+        .card-title p {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+
+        /* =========================
+           UPLOAD
+        ========================= */
+
+        .upload-area {
+            position: relative;
+
+            border: 2px dashed #cbd5e1;
+
+            border-radius: 16px;
+
+            min-height: 270px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            background: #f8fafc;
+
+            transition: 0.3s ease;
+
+            overflow: hidden;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: #3b82f6;
+
+            background: #eff6ff;
+        }
+
+        .upload-area input {
+            position: absolute;
+
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            opacity: 0;
+
+            cursor: pointer;
+        }
+
+        .upload-content {
+            padding: 25px;
+        }
+
+        .upload-icon {
+            width: 65px;
+            height: 65px;
+
+            margin: 0 auto 15px;
+
+            border-radius: 18px;
+
+            background: #dbeafe;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+
+            color: #2563eb;
+        }
+
+        .upload-content h4 {
+            font-size: 15px;
+
+            margin-bottom: 7px;
+        }
+
+        .upload-content p {
+            font-size: 12px;
+
+            color: #94a3b8;
+
+            margin-bottom: 15px;
+        }
+
+        .browse {
+            display: inline-block;
+
+            color: #2563eb;
+
+            font-weight: 700;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           PREVIEW
+        ========================= */
+
+        #preview-container {
+            display: none;
+
+            margin-top: 18px;
+
+            position: relative;
+        }
+
+        #preview-img {
+            width: 100%;
+
+            height: 270px;
+
+            object-fit: contain;
+
+            background: #0f172a;
+
+            border-radius: 14px;
+        }
+
+        .image-info {
+            position: absolute;
+
+            bottom: 10px;
+            left: 10px;
+
+            padding: 6px 10px;
+
+            background: rgba(15,23,42,0.8);
+
+            color: white;
+
+            border-radius: 7px;
+
+            font-size: 10px;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .btn {
+            width: 100%;
+
+            border: none;
+
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border-radius: 11px;
+
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #0891b2
+            );
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.25s ease;
+
+            box-shadow:
+                0 8px 18px rgba(37,99,235,0.22);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 12px 24px rgba(37,99,235,0.3);
+        }
+
+        .btn:disabled {
+            background: #cbd5e1;
+
+            box-shadow: none;
+
+            cursor: not-allowed;
+        }
+
+
+        /* =========================
+           RESULTADO
+        ========================= */
+
+        #resultado {
+            display: none;
+
+            animation: aparecer 0.5s ease;
+        }
+
+        @keyframes aparecer {
+
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+        .prediction {
+            padding: 18px;
+
+            border-radius: 14px;
+
+            background: #f8fafc;
+
+            border: 1px solid #e2e8f0;
+
+            text-align: center;
+
+            margin-bottom: 22px;
+        }
+
+        .prediction-label {
+            font-size: 11px;
+
+            color: #64748b;
+
+            margin-bottom: 6px;
+        }
+
+        #prediccionPrincipal {
+            font-size: 25px;
+
+            font-weight: 800;
+
+            margin-bottom: 5px;
+        }
+
+        #confianza {
+            font-size: 12px;
+
+            color: #64748b;
+        }
+
+
+        /* =========================
+           PROBABILIDADES
+        ========================= */
+
+        .probability {
+            margin-bottom: 18px;
+        }
+
+        .prob-top {
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 8px;
+        }
+
+        .prob-name {
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        .prob-value {
+            font-size: 14px;
+
+            font-weight: 800;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+        }
+
+        .dot-normal {
+            background: #10b981;
+        }
+
+        .dot-neumonia {
+            background: #ef4444;
+        }
+
+        .bar {
+            height: 11px;
+
+            width: 100%;
+
+            background: #e2e8f0;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+        .fill {
+            height: 100%;
+
+            width: 0%;
+
+            border-radius: 20px;
+
+            transition: width 1s ease;
+        }
+
+        .normal-fill {
+            background: linear-gradient(
+                90deg,
+                #34d399,
+                #059669
+            );
+        }
+
+        .neumonia-fill {
+            background: linear-gradient(
+                90deg,
+                #fb7185,
+                #dc2626
+            );
+        }
+
+
+        /* =========================
+           INFO
+        ========================= */
+
+        .info-box {
+            display: flex;
+
+            gap: 10px;
+
+            align-items: flex-start;
+
+            margin-top: 22px;
+
+            padding: 12px;
+
+            border-radius: 10px;
+
+            background: #fffbeb;
+
+            border: 1px solid #fde68a;
+
+            color: #92400e;
+
+            font-size: 11px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        .loading {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+
+            border: 2px solid rgba(255,255,255,0.4);
+
+            border-top-color: white;
+
+            border-radius: 50%;
+
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            text-align: center;
+
+            margin-top: 28px;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media(max-width: 800px) {
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            header {
+                padding: 0 5%;
+            }
+
+            .status {
+                display: none;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<header>
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            🫁
+        </div>
+
+        <div class="logo-text">
+            <h2>NeumoAI</h2>
+            <span>Análisis inteligente de radiografías</span>
+        </div>
+
+    </div>
+
+
+    <div class="status">
+
+        <div class="status-dot"></div>
+
+        Sistema conectado
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <div class="badge">
+            ✦ INTELIGENCIA ARTIFICIAL MÉDICA
+        </div>
+
+        <h1>
+            Detección de <span>Neumonía</span>
+        </h1>
+
+        <p>
+            Sube una radiografía de tórax y nuestro modelo de
+            inteligencia artificial analizará la imagen para
+            estimar las probabilidades de neumonía y normalidad.
+        </p>
+
+    </section>
+
+
+    <!-- DASHBOARD -->
+
+    <section class="dashboard">
+
+
+        <!-- =========================
+             CARGAR IMAGEN
+        ========================== -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+
+                    <div class="card-title-icon">
+                        📷
+                    </div>
+
+                    <div>
+                        <h3>Radiografía</h3>
+                        <p>Selecciona una imagen para analizar</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="upload-area"
+                id="dropArea"
+            >
+
+                <div class="upload-content">
+
+                    <div class="upload-icon">
+                        📁
+                    </div>
+
+                    <h4>
+                        Arrastra tu radiografía aquí
+                    </h4>
+
+                    <p>
+                        PNG, JPG o JPEG
+                    </p>
+
+                    <span class="browse">
+                        Seleccionar imagen
+                    </span>
+
+                </div>
+
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/*"
+                >
+
+            </div>
+
+
+            <div id="preview-container">
+
+                <img
+                    id="preview-img"
+                    src="#"
+                    alt="Vista previa"
+                >
+
+                <div class="image-info">
+                    Radiografía seleccionada
+                </div>
+
+            </div>
+
+
+            <button
+                id="btnAnalizar"
+                class="btn"
+                disabled
+            >
+                🔬 Analizar radiografía
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             RESULTADOS
+        ========================== -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+
+                    <div class="card-title-icon">
+                        📊
+                    </div>
+
+                    <div>
+                        <h3>Resultado del análisis</h3>
+                        <p>Distribución de probabilidades</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div id="resultado">
+
+
+                <div class="prediction">
+
+                    <div class="prediction-label">
+                        PREDICCIÓN PRINCIPAL
+                    </div>
+
+                    <div id="prediccionPrincipal">
+                        -
+                    </div>
+
+                    <div id="confianza">
+                        Confianza: -
+                    </div>
+
+                </div>
+
+
+                <!-- NORMAL -->
+
+                <div class="probability">
+
+                    <div class="prob-top">
+
+                        <div class="prob-name">
+
+                            <span class="dot dot-normal"></span>
+
+                            NORMAL
+
+                        </div>
+
+                        <div
+                            class="prob-value"
+                            id="val-normal"
+                        >
+                            0%
+                        </div>
+
+                    </div>
+
+                    <div class="bar">
+
+                        <div
+                            id="bar-normal"
+                            class="fill normal-fill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- NEUMONIA -->
+
+                <div class="probability">
+
+                    <div class="prob-top">
+
+                        <div class="prob-name">
+
+                            <span class="dot dot-neumonia"></span>
+
+                            PNEUMONIA
+
+                        </div>
+
+                        <div
+                            class="prob-value"
+                            id="val-neumonia"
+                        >
+                            0%
+                        </div>
+
+                    </div>
+
+                    <div class="bar">
+
+                        <div
+                            id="bar-neumonia"
+                            class="fill pneumonia-fill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <span>⚠️</span>
+
+                    <span>
+                        Este resultado corresponde a una predicción
+                        realizada por un modelo de inteligencia artificial
+                        y no sustituye la evaluación de un profesional
+                        médico.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- MENSAJE INICIAL -->
+
+            <div id="estadoInicial"
+                 style="text-align:center; padding:55px 20px; color:#94a3b8;">
+
+                <div style="font-size:42px; margin-bottom:12px;">
+                    🧠
+                </div>
+
+                <h4 style="color:#64748b; margin-bottom:6px;">
+                    Esperando una imagen
+                </h4>
+
+                <p style="font-size:12px;">
+                    Sube una radiografía para comenzar el análisis.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+
+        NeumoAI · Sistema experimental de clasificación mediante IA
+
+    </footer>
+
+</main>
+
+
+<script>
+
+    let archivoSeleccionado = null;
+
+    const input = document.getElementById("imageInput");
+    const dropArea = document.getElementById("dropArea");
+
+    const previewContainer =
+        document.getElementById("preview-container");
+
+    const previewImg =
+        document.getElementById("preview-img");
+
+    const btn =
+        document.getElementById("btnAnalizar");
+
+    const resultado =
+        document.getElementById("resultado");
+
+    const estadoInicial =
+        document.getElementById("estadoInicial");
+
+
+    /* =========================
+       SELECCIONAR IMAGEN
+    ========================== */
+
+    input.addEventListener("change", function(event) {
+
+        const archivo = event.target.files[0];
+
+        procesarArchivo(archivo);
+
+    });
+
+
+    function procesarArchivo(archivo) {
+
+        if (!archivo) return;
+
+        if (!archivo.type.startsWith("image/")) {
+
+            alert("Por favor selecciona una imagen válida.");
+
+            return;
+        }
+
+        archivoSeleccionado = archivo;
+
+        const lector = new FileReader();
+
+        lector.onload = function(e) {
+
+            previewImg.src = e.target.result;
+
+            previewContainer.style.display = "block";
+
+            btn.disabled = false;
+
+            resultado.style.display = "none";
+
+            estadoInicial.style.display = "block";
+
+        };
+
+        lector.readAsDataURL(archivo);
+
+    }
+
+
+    /* =========================
+       DRAG & DROP
+    ========================== */
+
+    dropArea.addEventListener("dragover", function(e) {
+
+        e.preventDefault();
+
+        dropArea.classList.add("dragover");
+
+    });
+
+
+    dropArea.addEventListener("dragleave", function() {
+
+        dropArea.classList.remove("dragover");
+
+    });
+
+
+    dropArea.addEventListener("drop", function(e) {
+
+        e.preventDefault();
+
+        dropArea.classList.remove("dragover");
+
+        const archivo = e.dataTransfer.files[0];
+
+        procesarArchivo(archivo);
+
+    });
+
+
+    /* =========================
+       ANALIZAR
+    ========================== */
+
+    btn.addEventListener("click", enviarImagen);
+
+
+    async function enviarImagen() {
+
+        if (!archivoSeleccionado) return;
+
+
+        btn.disabled = true;
+
+        btn.innerHTML = `
+            <span class="loading">
+                <span class="spinner"></span>
+                Analizando radiografía...
+            </span>
+        `;
+
+
+        resultado.style.display = "none";
+
+
+        const formData = new FormData();
+
+        formData.append(
+            "file",
+            archivoSeleccionado
+        );
+
+
+        try {
+
+            const response = await fetch('/predict/', {
+                method: 'POST',
+                body: formData
+            });
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Error en el servidor"
+                );
+
+            }
+
+
+            const data = await response.json();
+
+
+            console.log("Respuesta IA:", data);
+
+
+            const detalles = data.detalles;
+
+
+            const pNormal =
+                parseFloat(detalles["NORMAL"]) || 0;
+
+            const pNeumonia =
+                parseFloat(detalles["PNEUMONIA"]) || 0;
+
+
+            /* =========================
+               DETERMINAR PREDICCIÓN
+            ========================== */
+
+            let prediccion;
+
+            let confianza;
+
+
+            if (pNeumonia > pNormal) {
+
+                prediccion = "PNEUMONIA";
+
+                confianza = pNeumonia;
+
+                document.getElementById(
+                    "prediccionPrincipal"
+                ).style.color = "#dc2626";
+
+            } else {
+
+                prediccion = "NORMAL";
+
+                confianza = pNormal;
+
+                document.getElementById(
+                    "prediccionPrincipal"
+                ).style.color = "#059669";
+
+            }
+
+
+            document.getElementById(
+                "prediccionPrincipal"
+            ).innerText = prediccion;
+
+
+            document.getElementById(
+                "confianza"
+            ).innerText =
+                "Confianza: " +
+                confianza +
+                "%";
+
+
+            /* =========================
+               ACTUALIZAR PORCENTAJES
+            ========================== */
+
+            document.getElementById(
+                "val-normal"
+            ).innerText =
+                pNormal + "%";
+
+
+            document.getElementById(
+                "val-neumonia"
+            ).innerText =
+                pNeumonia + "%";
+
+
+            /* =========================
+               BARRAS
+            ========================== */
+
+            setTimeout(() => {
+
+                document.getElementById(
+                    "bar-normal"
+                ).style.width =
+                    pNormal + "%";
+
+
+                document.getElementById(
+                    "bar-neumonia"
+                ).style.width =
+                    pNeumonia + "%";
+
+            }, 100);
+
+
+            estadoInicial.style.display = "none";
+
+            resultado.style.display = "block";
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "No se pudo conectar con el servidor de IA."
+            );
+
+        } finally {
+
+            btn.disabled = false;
+
+            btn.innerHTML =
+                "🔬 Analizar radiografía";
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>
