@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from ultralytics import YOLO
 from PIL import Image
 import io
@@ -15,6 +16,12 @@ app.add_middleware(
 )
 
 model = YOLO("best.pt")
+
+# Ruta para servir la página web directamente en la raíz de tu dominio de Render
+@app.get("/", response_class=HTMLResponse)
+def home():
+    with open("index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
